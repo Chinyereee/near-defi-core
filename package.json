@@ -1,0 +1,20 @@
+{
+    "name":  "near-defi-core",
+    "version":  "1.0.0",
+    "description":  "",
+    "main":  "index.js",
+    "scripts":  {
+                    "test":  "echo \"Error: no test specified\" \u0026\u0026 exit 1"
+                },
+    "keywords":  [
+
+                 ],
+    "author":  "",
+    "license":  "ISC",
+    "dependencies":  {
+                         "dotenv":  "^18.0.10",
+                         "near-api-js":  "^7.4.0",
+                         "viem":  "^2.57.17"
+                     },
+    "type":  "module"
+}
