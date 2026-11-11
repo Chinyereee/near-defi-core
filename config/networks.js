@@ -1,27 +1,61 @@
-import dotenv from 'dotenv';
-dotenv.config();
+// config/networks.js
+// Single source of truth for every network the app talks to.
+// RPC lists are ordered: env override first, then public fallbacks.
+// Comma-separate multiple URLs in env, e.g. BASE_RPC_URL=https://a,https://b
+import 'dotenv/config';
+import { mainnet, polygon, base } from 'viem/chains';
 
-export const nearConfig = {
-  networkId: 'testnet',
-  nodeUrl: process.env.NEAR_RPC_URL || 'https://near.org',
-  walletUrl: 'https://mynearwallet.com',
-  helperUrl: 'https://near.org'
+const rpcList = (envVar, defaults) => {
+  const fromEnv = (process.env[envVar] || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return [...new Set([...fromEnv, ...defaults])];
 };
 
-export const evmConfig = {
+export const EVM_CHAINS = {
   ethereum: {
-    id: 1,
-    name: 'Ethereum',
-    rpcUrl: process.env.ETH_RPC_URL
+    chain: mainnet,
+    intentsId: 'eth', // `blockchain` value in the 1Click token list
+    nativeSymbol: 'ETH',
+    rpcUrls: rpcList('ETH_RPC_URL', [
+      'https://ethereum-rpc.publicnode.com',
+      'https://eth.llamarpc.com',
+    ]),
   },
   polygon: {
-    id: 137,
-    name: 'Polygon',
-    rpcUrl: process.env.POLYGON_RPC_URL
+    chain: polygon,
+    intentsId: 'pol',
+    nativeSymbol: 'POL',
+    rpcUrls: rpcList('POLYGON_RPC_URL', [
+      'https://polygon-bor-rpc.publicnode.com',
+      'https://polygon.llamarpc.com',
+    ]),
   },
   base: {
-    id: 8453,
-    name: 'Base',
-    rpcUrl: process.env.BASE_RPC_URL
-  }
+    chain: base,
+    intentsId: 'base',
+    nativeSymbol: 'ETH',
+    rpcUrls: rpcList('BASE_RPC_URL', [
+      'https://base-rpc.publicnode.com',
+      'https://mainnet.base.org',
+    ]),
+  },
 };
+
+// NEAR Intents has no testnet, so the whole app runs on mainnet.
+const NEAR_NETWORK = process.env.NEAR_NETWORK || 'mainnet';
+export const NEAR_CONFIG = {
+  networkId: NEAR_NETWORK,
+  // Tried in order; a node that errors at the HTTP level is skipped.
+  rpcUrls: rpcList(
+    'NEAR_RPC_URL',
+    NEAR_NETWORK === 'mainnet'
+      ? ['https://rpc.mainnet.fastnear.com', 'https://near.lava.build', 'https://rpc.mainnet.near.org']
+      : ['https://test.rpc.fastnear.com', 'https://neart.lava.build', 'https://rpc.testnet.near.org']
+  ),
+  mpcContract: NEAR_NETWORK === 'mainnet' ? 'v1.signer' : 'v1.signer-prod.testnet',
+};
+
+export const ONE_CLICK_BASE_URL =
+  process.env.ONE_CLICK_BASE_URL || 'https://1click.chaindefuser.com';

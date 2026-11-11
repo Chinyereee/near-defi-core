@@ -1,20 +1,37 @@
 {
-    "name":  "near-defi-core",
-    "version":  "1.0.0",
-    "description":  "",
-    "main":  "index.js",
-    "scripts":  {
-                    "test":  "echo \"Error: no test specified\" \u0026\u0026 exit 1"
-                },
-    "keywords":  [
-
-                 ],
-    "author":  "",
-    "license":  "ISC",
-    "dependencies":  {
-                         "dotenv":  "^18.0.10",
-                         "near-api-js":  "^7.4.0",
-                         "viem":  "^2.57.17"
-                     },
-    "type":  "module"
+  "name": "near-defi-core",
+  "version": "1.0.0",
+  "description": "Chain-abstracted multi-chain account & route router on NEAR",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node scripts/dev.js",
+    "server": "node server.js",
+    "build": "vite build --config web/vite.config.ts",
+    "serve": "node server.js",
+    "typecheck": "tsc -p web/tsconfig.json",
+    "quote": "node test-intents.js",
+    "verify:derivation": "node scripts/verify-derivation.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@noble/curves": "^2.4.0",
+    "@noble/hashes": "^2.4.0",
+    "@scure/base": "^2.3.0",
+    "dotenv": "^18.0.10",
+    "near-api-js": "^7.4.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "viem": "^2.57.18"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.5"
+  }
 }
