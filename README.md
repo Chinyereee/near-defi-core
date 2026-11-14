@@ -14,7 +14,7 @@ Built for the NEAR hackathon, Track 1: Unstoppable DeFi.
 
 
 
-\## The problem
+## The problem
 
 
 
