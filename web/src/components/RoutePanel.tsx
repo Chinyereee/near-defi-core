@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ChainKey, RouteQuote, RoutesResponse } from '../types';
-import { CHAIN_LABEL, CHAIN_MARK, CHAIN_ORDER, eta, fmtAmount, fmtUsd, shortAddr } from '../format';
+import { CHAIN_LABEL, CHAIN_MARK, eta, fmtAmount, fmtUsd, shortAddr } from '../format';
 import { Freshness, type FreshState } from './Freshness';
 
 type Props = {
@@ -9,7 +9,6 @@ type Props = {
   symbol: string;
   setSymbol: (v: string) => void;
   from: ChainKey;
-  setFrom: (v: ChainKey) => void;
   routes: RoutesResponse | null;
   loading: boolean;
   error: string;
@@ -21,17 +20,38 @@ type Props = {
 
 const SYMBOLS = ['USDC', 'USDT'];
 
+const ROW_ORDER: ChainKey[] = ['polygon', 'ethereum', 'base'];
+
 export function RoutePanel(p: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const list = p.routes?.routes ?? [];
-  const live = list.filter((r) => r.status === 'ok');
+  
+const [picked, setPicked] = useState(false);
 
-  // Keep the user's pick across refreshes; otherwise follow the best route.
-  useEffect(() => {
-    if (!list.length) return;
-    if (!selectedId || !list.some((r) => r.id === selectedId)) setSelectedId((list.find((r) => r.best) ?? list[0]).id);
-  }, [list, selectedId]);
+// Only the token selected above, so one row per destination chain.
+const rows = useMemo(() => {
+  const all = p.routes?.routes ?? [];
+  return ROW_ORDER.map((c) => ({
+    chain: c,
+    origin: c === p.from,
+    route: c === p.from ? null : (all.find((r) => r.toChain === c && r.toSymbol === p.symbol) ?? null),
+  }));
+}, [p.routes, p.symbol, p.from]);
+const list = useMemo(() => rows.map((r) => r.route).filter(Boolean) as RouteQuote[], [rows]);
+const live = list.filter((r) => r.status === 'ok');
+const bestId = live.length
+  ? live.reduce((a, b) => (Number(b.netUsd ?? -Infinity) > Number(a.netUsd ?? -Infinity) ? b : a)).id
+  : null;
+
+useEffect(() => {
+  setPicked(false);
+}, [p.symbol, p.from, p.amount]);
+
+useEffect(() => {
+  if (!list.length) return;
+  const stillThere = selectedId && list.some((r) => r.id === selectedId);
+  if (!picked || !stillThere) setSelectedId(bestId ?? list[0].id);
+}, [list, bestId, picked, selectedId]);
 
   const selected = useMemo(() => list.find((r) => r.id === selectedId) ?? null, [list, selectedId]);
   const amountValid = /^\d*\.?\d+$/.test(p.amount) && Number(p.amount) > 0;
@@ -49,7 +69,7 @@ export function RoutePanel(p: Props) {
             : 'loading';
 
   const badge = (r: RouteQuote) =>
-    r.status === 'error' ? 'UNAVAILABLE' : live.length < 2 ? 'ONLY LIVE' : r.best ? 'BEST NET' : 'LIVE';
+  r.status === 'error' ? 'UNAVAILABLE' : r.id === bestId && live.length > 1 ? 'BEST NET' : null;
 
   return (
     <section className="panel routes" aria-label="Cross-chain routes">
@@ -91,46 +111,63 @@ export function RoutePanel(p: Props) {
             </button>
           ))}
         </div>
-        <div className="seg" role="group" aria-label="Origin chain">
-          <span className="seg-label">from</span>
-          {CHAIN_ORDER.map((c) => (
-            <button key={c} type="button" className={c === p.from ? 'seg-btn seg-on' : 'seg-btn'} aria-pressed={c === p.from} onClick={() => p.setFrom(c)}>
-              {CHAIN_LABEL[c]}
-            </button>
-          ))}
-        </div>
-      </div>
+       </div>
 
       <div className="routes-body">
         <div className="route-options" role="listbox" aria-label="Route options">
-          {list.length === 0 && (
-            <p className="empty">{fresh === 'loading' ? 'Asking solvers for quotes…' : fresh === 'idle' ? 'Enter an amount above zero.' : 'No routes yet.'}</p>
-          )}
-          {list.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              role="option"
-              aria-selected={r.id === selectedId}
-              className={['route-option', r.id === selectedId && 'route-option-on', r.status === 'error' && 'route-option-error'].filter(Boolean).join(' ')}
-              onClick={() => setSelectedId(r.id)}
-            >
-              <span className="option-mark">{CHAIN_MARK[r.toChain]}</span>
-              <span className="option-copy">
-                <span className="option-title">
-                  {CHAIN_LABEL[r.toChain]} · {r.toSymbol}
-                  <span className={r.best ? 'badge badge-best' : r.status === 'error' ? 'badge badge-err' : 'badge'}>{badge(r)}</span>
-                </span>
-                <span className="option-sub">{r.status === 'error' ? r.error : `${eta(r.timeEstimateSec)} · fee ${fmtUsd(r.routeFeeUsd)}`}</span>
-              </span>
-              <span className="option-quote">
-                {r.status === 'ok' ? fmtAmount(r.amountOut, 4) : '—'}
-                <span>{r.toSymbol} out</span>
-              </span>
-            </button>
-          ))}
+  {list.length === 0 && (
+    <p className="empty">
+      {fresh === 'loading' ? 'Asking solvers for quotes…' : fresh === 'idle' ? 'Enter an amount above zero.' : 'No routes yet.'}
+    </p>
+  )}
+  {list.length > 0 &&
+    rows.map(({ chain, origin, route: r }) =>
+      origin ? (
+        <div key={chain} className="route-option" style={{ opacity: 0.55 }} aria-disabled="true">
+          <span className="option-mark">{CHAIN_MARK[chain]}</span>
+          <span className="option-copy">
+            <span className="option-title">{CHAIN_LABEL[chain]} · {p.symbol}</span>
+            <span className="option-sub">Sending from here</span>
+          </span>
         </div>
-
+      ) : !r ? (
+        <div key={chain} className="route-option" style={{ opacity: 0.55 }} aria-disabled="true">
+          <span className="option-mark">{CHAIN_MARK[chain]}</span>
+          <span className="option-copy">
+            <span className="option-title">{CHAIN_LABEL[chain]} · {p.symbol}</span>
+            <span className="option-sub">No quote</span>
+          </span>
+        </div>
+      ) : (
+        <button
+          key={r.id}
+          type="button"
+          role="option"
+          aria-selected={r.id === selectedId}
+          className={['route-option', r.id === selectedId && 'route-option-on', r.status === 'error' && 'route-option-error'].filter(Boolean).join(' ')}
+          onClick={() => {
+            setSelectedId(r.id);
+            setPicked(true);
+          }}
+        >
+          <span className="option-mark">{CHAIN_MARK[r.toChain]}</span>
+          <span className="option-copy">
+            <span className="option-title">
+              {CHAIN_LABEL[r.toChain]} · {r.toSymbol}
+              {badge(r) && (
+                <span className={r.id === bestId ? 'badge badge-best' : r.status === 'error' ? 'badge badge-err' : 'badge'}>{badge(r)}</span>
+              )}
+            </span>
+            <span className="option-sub">{r.status === 'error' ? r.error : `${eta(r.timeEstimateSec)} · fee ${fmtUsd(r.routeFeeUsd)}`}</span>
+          </span>
+          <span className="option-quote">
+            {r.status === 'ok' ? fmtAmount(r.amountOut, 4) : '—'}
+            <span>{r.toSymbol} out</span>
+          </span>
+        </button>
+      )
+    )}
+</div>
         <div className="route-detail" aria-live="polite">
           {selected && selected.status === 'ok' ? (
             <>
