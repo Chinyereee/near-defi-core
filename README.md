@@ -1,4 +1,4 @@
-\# NEAR DeFi Core
+# NEAR DeFi Core
 
 
 
@@ -22,55 +22,55 @@ Money is scattered across chains. Each one needs its own wallet, its own gas, an
 
 
 
-\## What it does
+## What it does
 
 
 
-\- Reads gas prices on Ethereum, Polygon and Base through public RPCs, with fallbacks so one dead node doesn't break the page.
+- Reads gas prices on Ethereum, Polygon and Base through public RPCs, with fallbacks so one dead node doesn't break the page.
 
-\- Derives one EVM address from a NEAR account using Chain Signatures. The address is checked against the live `v1.signer` contract.
+- Derives one EVM address from a NEAR account using Chain Signatures. The address is checked against the live `v1.signer` contract.
 
-\- Reads token balances on all three chains with one Multicall3 call per chain.
+- Reads token balances on all three chains with one Multicall3 call per chain.
 
-\- Asks NEAR Intents (1Click API) for live swap quotes and ranks the routes by what you actually receive after fees and gas.
-
-
-
-\## How NEAR Intents is used
+- Asks NEAR Intents (1Click API) for live swap quotes and ranks the routes by what you actually receive after fees and gas.
 
 
 
-\- `providers/near-intents.js` calls the 1Click `/v0/tokens` and `/v0/quote` endpoints.
-
-\- Quotes are dry runs. No deposit address is created and no funds move.
-
-\- `lib/api.js` combines each quote with live gas to work out the net value.
+## How NEAR Intents is used
 
 
 
-\## What works today
+- `providers/near-intents.js` calls the 1Click `/v0/tokens` and `/v0/quote` endpoints.
+
+- Quotes are dry runs. No deposit address is created and no funds move.
+
+- `lib/api.js` combines each quote with live gas to work out the net value.
 
 
 
-\- Live balances, gas and quotes in the dashboard.
-
-\- Derived address verified against the signer contract: `npm run verify:derivation`.
-
-\- Quote ranking across Polygon, Ethereum and Base for USDC and USDT.
+## What works today
 
 
 
-\## What is not built yet
+- Live balances, gas and quotes in the dashboard.
+
+- Derived address verified against the signer contract: `npm run verify:derivation`.
+
+- Quote ranking across Polygon, Ethereum and Base for USDC and USDT.
 
 
 
-\- Signing and sending a swap. The review step is a preview.
-
-\- Yield. This is a router, not a yield product.
+## What is not built yet
 
 
 
-\## Run it
+- Signing and sending a swap. The review step is a preview.
+
+- Yield. This is a router, not a yield product.
+
+
+
+## Run it
 
 
 
@@ -106,7 +106,7 @@ Open the Vite address it prints, usually `http://localhost:5173`.
 
 
 
-\## Stack
+## Stack
 
 
 
@@ -114,7 +114,7 @@ React, Vite, TypeScript, viem, near-api-js, NEAR Intents 1Click API, a small Nod
 
 
 
-\## Prior work
+## Prior work
 
 
 
