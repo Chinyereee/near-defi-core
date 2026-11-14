@@ -121,6 +121,19 @@ React, Vite, TypeScript, viem, near-api-js, NEAR Intents 1Click API, a small Nod
 The route ranking comes from the math in my flash loan arbitrage router: \[https://github.com/Chinyereee/flash-loan-arbitrage]. Flash loans are atomic on one chain, so only the comparison logic carried over. The NEAR Intents integration, the Chain Signatures address and the dashboard were built for this hackathon.
 
 
+## Try it
+
+1. `npm install`, then add `NEAR_ACCOUNT_ID=your-account.near` to `.env`, then `npm run dev`.
+2. Open the address Vite prints. You see the derived address, gas and balances on three chains.
+3. In "Where should this USDC go?" enter 10. You see ranked routes, the best one highlighted, with net value after fees and gas.
+4. Run `npm run verify:derivation`. You see "Derivation verified against v1.signer".
+
+## Built in the hackathon window
+
+Baseline before November 1: my flash loan arbitrage project, [flash-loan-arbitrage](https://github.com/Chinyereee/flash-loan-arbitrage). Only the route comparison idea carried over.
+
+Built in the window: the NEAR Intents client, the Chain Signatures address derivation, Multicall3 balance reads, the dashboard and the route ranking.
+
 
 \## Author
 
