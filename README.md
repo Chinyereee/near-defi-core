@@ -135,7 +135,7 @@ Baseline before November 1: my flash loan arbitrage project, [flash-loan-arbitra
 Built in the window: the NEAR Intents client, the Chain Signatures address derivation, Multicall3 balance reads, the dashboard and the route ranking.
 
 
-\## Author
+## Author
 
 
 
