@@ -139,5 +139,5 @@ Built in the window: the NEAR Intents client, the Chain Signatures address deriv
 
 
 
-Chinyere John-Nnah. \[Twitter/X](https://x.com/Nera\_of\_Web3)
+Chinyere John-Nnah. \[Twitter/X](https://x.com/_Ne_raa)
 
